@@ -12,6 +12,7 @@ p_load(MASS, # for statistical analysis and user-friendly export of models
        tidyverse, # data manipulation and visualisation
        haven,
        showtext, # using non-standard font in R graphs
+       broom,
        ggtext, # coloring title in plots
        sjlabelled, # using SPSS datasets with its labels
        ggplot2,
@@ -32,6 +33,41 @@ df_evs <-
     original    = TRUE,
     server      = "data.aussda.at")
 
+# 012. save data to data folder----
 
+write_csv(df_evs, "./data/df_evs.csv")
 
+# 015. Select variables ----
 
+df <- df_evs |> dplyr::select(
+  year=S002EVS,
+  sex=X001,
+  homo=F118
+)
+
+head(df)
+tail(df)
+print(df)
+
+# 020. Analysis----
+
+# 021. Linear model----
+
+# fitting the model
+lm_fit <- lm(homo ~ year + sex, data = df)
+
+# summary of the model
+summary(lm_fit)
+
+tidy(lm_fit)
+
+# 022. ordered logistic regression----
+
+# create a new df and mutate var homosexuality to factor var
+df1 <- df |> mutate(homo = as_factor(homo))
+
+polr_fit <- polr(homo ~ year + sex, data = df1)
+
+# print in tidy format
+tidy(polr_fit, exponentiate = TRUE,
+     conf.int = TRUE, p.values = TRUE)
